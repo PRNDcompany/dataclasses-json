@@ -38,7 +38,7 @@ class _ExtendedEncoder(json.JSONEncoder):
             else:
                 result = list(o)
         elif _isinstance_safe(o, datetime):
-            result = o.timestamp()
+            result = o.strftime("%Y-%m-%d %H:%M:%S")
         elif _isinstance_safe(o, UUID):
             result = str(o)
         elif _isinstance_safe(o, Enum):
@@ -216,8 +216,9 @@ def _support_extended_types(field_type, field_value):
         if isinstance(field_value, datetime):
             res = field_value
         else:
-            tz = datetime.now(timezone.utc).astimezone().tzinfo
-            res = datetime.fromtimestamp(field_value, tz=tz)
+            res = datetime.strptime(field_value, "%Y-%m-%d %H:%M:%S")
+            # tz = datetime.now(timezone.utc).astimezone().tzinfo
+            # res = datetime.fromtimestamp(field_value, tz=tz)
     elif _issubclass_safe(field_type, Decimal):
         res = (field_value
                if isinstance(field_value, Decimal)
