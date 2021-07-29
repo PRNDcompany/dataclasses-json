@@ -8,7 +8,7 @@ from dataclasses import (MISSING,
                          fields,
                          is_dataclass  # type: ignore
                          )
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Collection, Mapping, Union, get_type_hints, Tuple
@@ -39,6 +39,8 @@ class _ExtendedEncoder(json.JSONEncoder):
                 result = list(o)
         elif _isinstance_safe(o, datetime):
             result = o.strftime("%Y-%m-%d %H:%M:%S")
+        elif _isinstance_safe(o, date):
+            result = o.strftime('%Y-%m-%d')
         elif _isinstance_safe(o, UUID):
             result = str(o)
         elif _isinstance_safe(o, Enum):
@@ -219,6 +221,11 @@ def _support_extended_types(field_type, field_value):
             res = datetime.strptime(field_value, "%Y-%m-%d %H:%M:%S")
             # tz = datetime.now(timezone.utc).astimezone().tzinfo
             # res = datetime.fromtimestamp(field_value, tz=tz)
+    elif _issubclass_safe(field_type, date):
+        if isinstance(field_value, date):
+            res = field_value
+        else:
+            res = datetime.strptime(field_value, "%Y-%m-%d").date()
     elif _issubclass_safe(field_type, Decimal):
         res = (field_value
                if isinstance(field_value, Decimal)
